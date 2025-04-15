@@ -69,7 +69,19 @@ namespace ForbiddenWordScanner_WPF
             {
                 Directory.CreateDirectory(DirectoryOutPath.Text.ToString());
             }
-            var words = ForbiddenWordTextBox.Text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var words = ForbiddenWordTextBox.Text
+                .Split(new[] { ' ', '\n', '\r', '\t', ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(w => w.Trim())
+                .Where(w => !string.IsNullOrWhiteSpace(w))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (words == null || words.Count == 0)
+            {
+                MessageBox.Show("Список запрещенных слов пуст.");
+                return;
+            }
+
             _cts = new CancellationTokenSource();
             _scanService = new ScanService(words, DirectoryOutPath.Text, UpdateProgress, _cts.Token, SearchDerictoryPath.Text);
             await Task.Run(() => _scanService.StartScan());

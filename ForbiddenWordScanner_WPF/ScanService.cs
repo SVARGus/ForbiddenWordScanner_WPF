@@ -32,6 +32,7 @@ namespace ForbiddenWordScanner_WPF
 
         public void StartScan()
         {
+
             List<string> searchFilesInDerictory = FindFiles();
             int total  = searchFilesInDerictory.Count;
             int processed = 0;
@@ -43,18 +44,26 @@ namespace ForbiddenWordScanner_WPF
                 try
                 {
                     string content = File.ReadAllText(file);
-                    bool contains = _forbiddenWords.Any(w => content.Contains(w));
-                    if (contains)
+                    //bool contains = _forbiddenWords.Any(w => content.Contains(w));
+                    var matchedWords = _forbiddenWords.Where(w => Regex.IsMatch(content, Regex.Escape(w), RegexOptions.IgnoreCase)).ToList();
+
+                    if (matchedWords.Any())
                     {
                         string dest = Path.Combine(_outDerictoryPath, Path.GetFileName(file));
                         File.Copy(file, dest, true);
 
-                        string replase = ReplaseWords(content);
-                        File.WriteAllText(Path.Combine(_outDerictoryPath, "replaced_" + Path.GetFileName(file)), replase);
-                        //lock (_lock) { RaportGenerator.Log(file, content.Length); }
+                        string replaced = content;
+                        foreach (var word in matchedWords)
+                        {
+                            replaced = Regex.Replace(replaced, Regex.Escape(word), "*******", RegexOptions.IgnoreCase);
+                        }
+
+                        string replacedFileName = Path.Combine(_outDerictoryPath, Path.GetFileNameWithoutExtension(file)) + ".replaced.txt";
+                        File.WriteAllText(replacedFileName, replaced);
+
                         lock (_lock)
                         {
-                            foreach (var word in _forbiddenWords)
+                            foreach (var word in matchedWords)
                             {
                                 int count = Regex.Matches(content, Regex.Escape(word), RegexOptions.IgnoreCase).Count;
                                 RaportGenerator.AddWordCount(word, count);

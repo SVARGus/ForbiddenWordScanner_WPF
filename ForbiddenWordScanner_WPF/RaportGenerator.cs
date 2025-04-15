@@ -22,11 +22,6 @@ namespace ForbiddenWordScanner_WPF
 
         public static void SaveTopWords(List<string> words)
         {
-            foreach (var word in words)
-            {
-                _wordCounts[word] = _wordCounts.TryGetValue(word, out int val) ? val + 1 : 1;
-            }
-
             var report = new StringBuilder();
             report.AppendLine("=== REPORT ===");
             foreach (var log in _logs)
