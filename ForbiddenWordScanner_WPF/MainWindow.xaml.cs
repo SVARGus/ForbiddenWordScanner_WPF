@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ForbiddenWordScanner_WPF
 {
@@ -33,8 +23,8 @@ namespace ForbiddenWordScanner_WPF
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string resultsDir = System.IO.Path.Combine(baseDir, "Results");
 
-
             DirectoryOutPath.Text = resultsDir;
+            UpdateWordScannerUI(false, false);
         }
 
         private void SelectForbiddenWordButton_Click(object sender, RoutedEventArgs e)
@@ -64,7 +54,7 @@ namespace ForbiddenWordScanner_WPF
 
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
-
+            UpdateWordScannerUI(true, false);
             if (!Directory.Exists(DirectoryOutPath.Text.ToString()))
             {
                 Directory.CreateDirectory(DirectoryOutPath.Text.ToString());
@@ -94,18 +84,20 @@ namespace ForbiddenWordScanner_WPF
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateWordScannerUI(true, true);
             _scanService.PausedScan();
         }
 
         private void ResumeButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateWordScannerUI(true, false);
             _scanService.ResumedScan();
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateWordScannerUI(false, false);
             _cts?.Cancel();
-            //_scanService.StopScan();
         }
 
         private void SelectDirectoryOutPathButton_Click(object sender, RoutedEventArgs e)
@@ -115,6 +107,14 @@ namespace ForbiddenWordScanner_WPF
             {
                 DirectoryOutPath.Text = dialog.SelectedPath;
             }
+        }
+
+        private void UpdateWordScannerUI(bool isRunning, bool isPaused)
+        {
+            StartButton.IsEnabled = !isRunning;
+            PauseButton.IsEnabled = !isPaused && isRunning;
+            ResumeButton.IsEnabled = isPaused && isRunning;
+            StopButton.IsEnabled = isRunning;
         }
     }
 }

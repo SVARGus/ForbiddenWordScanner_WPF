@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.IO;
-using System.Xml;
 using System.Text.RegularExpressions;
 
 namespace ForbiddenWordScanner_WPF
 {
     public class ScanService
     {
-        private List<string> _forbiddenWords; // Список плохих слов
-        private string _outDerictoryPath; // Папка сохранения отчета и измененных документов
-        private string _selectSearchDerictoryPath; // Дериктория поиска, по умолчанию все дериктории на компьютере
-        private Action<int> _progressBarCallback; // Прогресс бар
-        private CancellationToken _token; //
-        private ManualResetEvent _pauseEvent = new ManualResetEvent(true); // Сигнал состояния
-        private object _lock = new object(); // 
+        private List<string> _forbiddenWords;
+        private string _outDerictoryPath;
+        private string _selectSearchDerictoryPath;
+        private Action<int> _progressBarCallback;
+        private CancellationToken _token;
+        private ManualResetEvent _pauseEvent = new ManualResetEvent(true);
+        private object _lock = new object();
 
         public ScanService(List<string> forbiddenWords, string outDerictoryPath, Action<int> progressBarCallback, CancellationToken token, string selectSearchDerictoryPath = null)
         {
@@ -44,7 +42,6 @@ namespace ForbiddenWordScanner_WPF
                 try
                 {
                     string content = File.ReadAllText(file);
-                    //bool contains = _forbiddenWords.Any(w => content.Contains(w));
                     var matchedWords = _forbiddenWords.Where(w => Regex.IsMatch(content, Regex.Escape(w), RegexOptions.IgnoreCase)).ToList();
 
                     if (matchedWords.Any())
@@ -86,11 +83,11 @@ namespace ForbiddenWordScanner_WPF
         private List<string> FindFiles()
         {
             List<string> newFindFiles = new List<string>();
-            if(!string.IsNullOrEmpty(_selectSearchDerictoryPath))
+            if (!string.IsNullOrEmpty(_selectSearchDerictoryPath))
             {
                 try
                 {
-                    if(Directory.Exists(_selectSearchDerictoryPath))
+                    if (Directory.Exists(_selectSearchDerictoryPath))
                     {
                         var files = Directory.GetFiles(_selectSearchDerictoryPath, "*.*", SearchOption.AllDirectories);
                         newFindFiles.AddRange(files);
@@ -111,10 +108,14 @@ namespace ForbiddenWordScanner_WPF
                 foreach (DriveInfo drive in drives)
                 {
                     if (!drive.IsReady)
-                        continue;
+                    { 
+                        continue; 
+                    }
 
                     if (drive.DriveType != DriveType.Fixed && drive.DriveType != DriveType.Removable)
+                    {
                         continue;
+                    }
 
                     try
                     {
@@ -129,15 +130,6 @@ namespace ForbiddenWordScanner_WPF
             }
 
                 return newFindFiles;
-        }
-
-        private string ReplaseWords(string content)
-        {
-            foreach(var word in _forbiddenWords)
-            {
-                content = Regex.Replace(content, Regex.Escape(word), "*******", RegexOptions.IgnoreCase);
-            }
-            return content;
         }
 
         public void StopScan()

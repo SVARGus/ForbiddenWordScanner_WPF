@@ -1,1 +1,1 @@
-Lorem Main()
+Lorem Main() Тест рус
