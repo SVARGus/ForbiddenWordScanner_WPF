@@ -54,7 +54,6 @@ namespace ForbiddenWordScanner_WPF
 
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            UpdateWordScannerUI(true, false);
             if (!Directory.Exists(DirectoryOutPath.Text.ToString()))
             {
                 Directory.CreateDirectory(DirectoryOutPath.Text.ToString());
@@ -71,6 +70,8 @@ namespace ForbiddenWordScanner_WPF
                 MessageBox.Show("Список запрещенных слов пуст.");
                 return;
             }
+
+            UpdateWordScannerUI(true, false);
 
             _cts = new CancellationTokenSource();
             _scanService = new ScanService(words, DirectoryOutPath.Text, UpdateProgress, _cts.Token, SearchDerictoryPath.Text);
